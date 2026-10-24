@@ -55,3 +55,21 @@ Debug-ключ `~/.android/debug.keystore`
   ограничений запуска activity из фона, алярма достаточно.
 - Не добавлять per-day расписание, профили, статистику, уведомления — пока явно не попросят.
 - Не менять `applicationId` / имя `AdminReceiver` — это сломает уже установленный device owner.
+
+## Тестирование на устройстве
+
+`am force-stop` для device-owner приложения игнорируется («protected package»), поэтому
+процесс с закэшированными prefs надо убивать через `run-as`. Окно задаётся напрямую в prefs
+(минуты дня), запуск MainActivity применяет его:
+
+```sh
+adb shell run-as kz.tilltan kill $(adb shell pidof kz.tilltan)
+adb shell "run-as kz.tilltan sh -c 'printf \"<map><int name=\\\"start\\\" value=\\\"1165\\\" /><int name=\\\"end\\\" value=\\\"1168\\\" /></map>\" > shared_prefs/tilltan.xml'"
+adb shell am start -n kz.tilltan/.MainActivity
+adb shell dumpsys activity activities | grep -E "mLockTaskModeState|topResumedActivity"   # LOCKED, LockActivity
+adb shell dumpsys alarm | grep -A1 "kz.tilltan" | grep origWhen                            # window=0
+adb shell run-as kz.tilltan rm shared_prefs/tilltan.xml                                    # back to 22:00–06:00
+```
+
+Проверено на Android 16: Home/Recents/Back не выбивают, Call открывает dialer внутри kiosk,
+снятие по алярму, релок после перезагрузки (после первой разблокировки), `dpm remove-active-admin`.
