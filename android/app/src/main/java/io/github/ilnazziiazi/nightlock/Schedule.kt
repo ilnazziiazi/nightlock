@@ -12,6 +12,9 @@ object Schedule {
     fun save(ctx: Context, start: Int, end: Int) =
         prefs(ctx).edit().putInt("start", start).putInt("end", end).apply()
 
+    fun isActiveNow(ctx: Context): Boolean =
+        LocalTime.now().let { isActive(start(ctx), end(ctx), it.hour * 60 + it.minute) }
+
     fun isActive(start: Int, end: Int, nowMin: Int): Boolean = when {
         start == end -> false
         start < end -> nowMin in start until end

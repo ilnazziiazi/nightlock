@@ -16,9 +16,10 @@ class LockActivity : Activity() {
             "${getString(R.string.until).lowercase()} ${Schedule.hhmm(Schedule.end(this))}"
     }
 
+    /** Never pin outside the window: guards against the system restoring this screen in the morning. */
     override fun onResume() {
         super.onResume()
-        startLockTask()
+        if (Schedule.isActiveNow(this)) startLockTask() else release()
     }
 
     /** Legacy back path (predictive back is disabled in the manifest): swallow it. */
