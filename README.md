@@ -1,8 +1,6 @@
-# tilltan
+# night lock
 
-Shows up on the phone as **night lock**.
-
-**till tan** — "until morning" (*tan* is Kazakh for morning). Locks your phone for the night.
+Locks your phone for the night.
 Default window is 22:00–06:00. At night the screen shows only the current time, the unlock time and a
 **Call** button. There is no way out: no Home, no Recents, no notification shade, no reboot
 trick, no safe mode, no clock change.
@@ -12,7 +10,7 @@ battery drain: a single alarm scheduled for the next window boundary.
 
 ## Download
 
-Grab `tilltan-<version>.apk` from [Releases](https://github.com/ilnazziiazi/tilltan/releases)
+Grab `nightlock-<version>.apk` from [Releases](https://github.com/ilnazziiazi/nightlock/releases)
 and continue from [Install and grant permissions](#install-and-grant-permissions).
 
 ## Build
@@ -67,10 +65,10 @@ Remove (you will add everything back afterwards):
 
 ```sh
 adb install -t android/app/build/outputs/apk/debug/app-debug.apk
-adb shell dpm set-device-owner kz.tilltan/.AdminReceiver
+adb shell dpm set-device-owner io.github.ilnazziiazi.nightlock/.AdminReceiver
 ```
 
-Expected: `Success: Device owner set to package ComponentInfo{kz.tilltan/kz.tilltan.AdminReceiver}`.
+Expected: `Success: Device owner set to package ComponentInfo{io.github.ilnazziiazi.nightlock/io.github.ilnazziiazi.nightlock.AdminReceiver}`.
 
 Errors:
 - `already some accounts on the device` — an account is left, see `dumpsys account`.
@@ -79,7 +77,7 @@ Errors:
 
 ### 4. Restore accounts and open the app
 
-Add Google and the other accounts back. Open **tilltan** — it should say
+Add Google and the other accounts back. Open **night lock** — it should say
 "Device owner: yes. Lock is armed." Set the times. Done.
 
 The `-t` flag is always required: the APK is built with `testOnly`, which is what makes
@@ -91,7 +89,7 @@ the emergency exit below possible.
 cd android && ./gradlew :app:assembleRelease && adb install -r -t app/build/outputs/apk/release/app-release.apk
 ```
 
-Builds are signed with `~/.tilltan/release.jks`, described by `android/keystore.properties`
+Builds are signed with `~/.nightlock/release.jks`, described by `android/keystore.properties`
 (both outside git). Back them up: without that key you cannot update the installed app,
 only remove device owner and reinstall. Without `keystore.properties` the build falls back
 to the debug key, which the installed device owner will reject.
@@ -102,8 +100,8 @@ There is no way out of the lock from the phone itself. That is the point. The on
 is a computer with adb:
 
 ```sh
-adb shell dpm remove-active-admin kz.tilltan/.AdminReceiver
-adb uninstall kz.tilltan
+adb shell dpm remove-active-admin io.github.ilnazziiazi.nightlock/.AdminReceiver
+adb uninstall io.github.ilnazziiazi.nightlock
 ```
 
 The first command removes device owner and all restrictions; the lock screen releases

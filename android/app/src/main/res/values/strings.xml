@@ -5,5 +5,5 @@
     <string name="from">From</string>
     <string name="until">Until</string>
     <string name="owner_yes">Device owner: yes. Lock is armed.</string>
-    <string name="owner_no">Device owner: NO. Lock will not engage.\nRun: adb shell dpm set-device-owner kz.tilltan/.AdminReceiver</string>
+    <string name="owner_no">Device owner: NO. Lock will not engage.\nRun: adb shell dpm set-device-owner io.github.ilnazziiazi.nightlock/.AdminReceiver</string>
 </resources>

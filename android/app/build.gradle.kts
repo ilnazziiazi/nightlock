@@ -5,16 +5,16 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-// Release key lives outside the repo: ~/.tilltan/release.jks, described by android/keystore.properties.
+// Release key lives outside the repo: ~/.nightlock/release.jks, described by android/keystore.properties.
 val keystore = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { f ->
     Properties().apply { f.inputStream().use { load(it) } }
 }
 
 android {
-    namespace = "kz.tilltan"
+    namespace = "io.github.ilnazziiazi.nightlock"
     compileSdk = 36
     defaultConfig {
-        applicationId = "kz.tilltan"
+        applicationId = "io.github.ilnazziiazi.nightlock"
         minSdk = 33
         targetSdk = 36
         versionCode = 1

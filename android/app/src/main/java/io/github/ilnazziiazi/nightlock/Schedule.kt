@@ -1,4 +1,4 @@
-package kz.tilltan
+package io.github.ilnazziiazi.nightlock
 
 import android.content.Context
 import java.time.LocalDateTime
@@ -6,7 +6,7 @@ import java.time.LocalTime
 
 /** Daily lock window [start, end) in minutes of day. start == end means disabled. */
 object Schedule {
-    private fun prefs(ctx: Context) = ctx.getSharedPreferences("tilltan", Context.MODE_PRIVATE)
+    private fun prefs(ctx: Context) = ctx.getSharedPreferences("nightlock", Context.MODE_PRIVATE)
     fun start(ctx: Context) = prefs(ctx).getInt("start", 22 * 60)
     fun end(ctx: Context) = prefs(ctx).getInt("end", 6 * 60)
     fun save(ctx: Context, start: Int, end: Int) =

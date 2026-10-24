@@ -1,4 +1,4 @@
-package kz.tilltan
+package io.github.ilnazziiazi.nightlock
 
 import android.app.Activity
 import android.content.Intent

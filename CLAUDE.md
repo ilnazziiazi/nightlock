@@ -1,8 +1,8 @@
-# tilltan
+# night lock
 
-Launcher name: **night lock** (lowercase). Package stays `kz.tilltan` — renaming it breaks the installed device owner.
+Name is **night lock**, always lowercase. Package `io.github.ilnazziiazi.nightlock` — renaming it breaks the installed device owner.
 
-"till tan" — until morning (*tan* is Kazakh for morning). An Android app that turns the phone
+An Android app that turns the phone
 into a lock screen on a schedule (default 22:00–06:00) with no way out.
 Cold Turkey for the whole device; no per-site or per-app blocking.
 
@@ -32,7 +32,7 @@ Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask(
 - `MainActivity.kt` — two `TimePickerDialog`s, device-owner status. `onResume → sync()`,
   which is what makes settings unreachable at night: the screen is immediately covered by `LockActivity`.
 - `AdminReceiver.kt` — empty `DeviceAdminReceiver`, the target for `dpm`.
-- Device-owner policy (in `arm`): lock task packages = [tilltan, default dialer, clock app
+- Device-owner policy (in `arm`): lock task packages = [night lock, default dialer, clock app
   (so a morning alarm's full-screen UI can show and be dismissed)];
   features = KEYGUARD | GLOBAL_ACTIONS; restrictions = DISALLOW_SAFE_BOOT, DISALLOW_CONFIG_DATE_TIME.
 - `android:testOnly="true"` in the manifest so that `dpm remove-active-admin` works. Hence
@@ -51,7 +51,7 @@ SDK: `/opt/homebrew/share/android-commandlinetools` (brew cask `android-commandl
 path in `android/local.properties` (not in git). compileSdk/targetSdk 36, minSdk 33, AGP 8.13,
 Gradle 8.14 (wrapper; system gradle 9.x does not work with AGP 8).
 
-Signing: `~/.tilltan/release.jks` via `android/keystore.properties` (both gitignored). Debug
+Signing: `~/.nightlock/release.jks` via `android/keystore.properties` (both gitignored). Debug
 and release build types share this key, so they install over each other and `run-as` keeps
 working on debug builds. Without the properties file the build silently uses the debug key,
 which the installed device owner rejects.
@@ -61,7 +61,7 @@ which the installed device owner rejects.
 1. Bump `versionCode` / `versionName` in `app/build.gradle.kts`.
 2. `./gradlew :app:testDebugUnitTest :app:assembleRelease`, install and run the on-device test below.
 3. `git tag vX.Y && git push --tags`
-4. `cp app/build/outputs/apk/release/app-release.apk /tmp/tilltan-X.Y.apk && gh release create vX.Y /tmp/tilltan-X.Y.apk --title "tilltan X.Y" --notes "..."`
+4. `cp app/build/outputs/apk/release/app-release.apk /tmp/nightlock-X.Y.apk && gh release create vX.Y /tmp/nightlock-X.Y.apk --title "night lock X.Y" --notes "..."`
    (the `file#label` form only changes the display label, not the asset name).
 
 ## Don'ts
@@ -78,12 +78,12 @@ cached prefs has to be killed via `run-as`. Set the window directly in prefs (mi
 launching MainActivity applies it:
 
 ```sh
-adb shell run-as kz.tilltan kill $(adb shell pidof kz.tilltan)
-adb shell "run-as kz.tilltan sh -c 'printf \"<map><int name=\\\"start\\\" value=\\\"1165\\\" /><int name=\\\"end\\\" value=\\\"1168\\\" /></map>\" > shared_prefs/tilltan.xml'"
-adb shell am start -n kz.tilltan/.MainActivity
+adb shell run-as io.github.ilnazziiazi.nightlock kill $(adb shell pidof io.github.ilnazziiazi.nightlock)
+adb shell "run-as io.github.ilnazziiazi.nightlock sh -c 'printf \"<map><int name=\\\"start\\\" value=\\\"1165\\\" /><int name=\\\"end\\\" value=\\\"1168\\\" /></map>\" > shared_prefs/nightlock.xml'"
+adb shell am start -n io.github.ilnazziiazi.nightlock/.MainActivity
 adb shell dumpsys activity activities | grep -E "mLockTaskModeState|topResumedActivity"   # LOCKED, LockActivity
-adb shell dumpsys alarm | grep -A1 "kz.tilltan" | grep origWhen                            # window=0
-adb shell run-as kz.tilltan rm shared_prefs/tilltan.xml                                    # back to 22:00–06:00
+adb shell dumpsys alarm | grep -A1 "io.github.ilnazziiazi.nightlock" | grep origWhen                            # window=0
+adb shell run-as io.github.ilnazziiazi.nightlock rm shared_prefs/nightlock.xml                                    # back to 22:00–06:00
 ```
 
 Verified on Android 16: Home/Recents/Back don't escape, Call opens the dialer inside the kiosk,

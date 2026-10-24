@@ -1,4 +1,4 @@
-package kz.tilltan
+package io.github.ilnazziiazi.nightlock
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
