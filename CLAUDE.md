@@ -1,7 +1,9 @@
 # tilltan
 
+Launcher name: **night lock** (lowercase). Package stays `kz.tilltan` — renaming it breaks the installed device owner.
+
 "till tan" — until morning (*tan* is Kazakh for morning). An Android app that turns the phone
-into a "till tan" screen on a schedule (default 22:00–06:00) with no way out.
+into a lock screen on a schedule (default 22:00–06:00) with no way out.
 Cold Turkey for the whole device; no per-site or per-app blocking.
 
 ## Principles
@@ -24,7 +26,7 @@ Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask(
 - `SyncReceiver.kt` — the single entry point: alarm / BOOT_COMPLETED / TIME_SET /
   TIMEZONE_CHANGED → `sync(ctx)`: reschedule the alarm, apply device-owner policy (`arm`),
   launch `LockActivity` if the window is active, otherwise release it.
-- `LockActivity.kt` — current time (`TextClock`), "till tan", "until HH:MM", Call button (`ACTION_DIAL`).
+- `LockActivity.kt` — current time (`TextClock`), "until HH:MM", Call button (`ACTION_DIAL`).
   No timers, no handlers: the process does nothing while the screen is on.
   Back is swallowed, `onResume → startLockTask()`. `singleTask`, `lockTaskMode=if_whitelisted`.
 - `MainActivity.kt` — two `TimePickerDialog`s, device-owner status. `onResume → sync()`,

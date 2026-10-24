@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">tilltan</string>
-    <string name="till_tan">till tan</string>
+    <string name="app_name">night lock</string>
     <string name="call">Call</string>
     <string name="from">From</string>
     <string name="until">Until</string>

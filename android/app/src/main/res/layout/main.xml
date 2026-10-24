@@ -7,7 +7,7 @@
     android:padding="32dp">
 
     <TextView
-        android:text="@string/till_tan"
+        android:text="@string/app_name"
         android:textSize="40sp"
         android:layout_marginBottom="48dp"
         android:layout_width="wrap_content"

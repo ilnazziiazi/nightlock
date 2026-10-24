@@ -14,13 +14,6 @@
         android:layout_height="wrap_content" />
 
     <TextView
-        android:text="@string/till_tan"
-        android:textSize="32sp"
-        android:layout_marginTop="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <TextView
         android:id="@+id/until"
         android:textSize="20sp"
         android:layout_marginTop="8dp"

@@ -1,7 +1,9 @@
 # tilltan
 
+Shows up on the phone as **night lock**.
+
 **till tan** — "until morning" (*tan* is Kazakh for morning). Locks your phone for the night.
-Default window is 22:00–06:00. At night the screen shows only "till tan", a countdown and a
+Default window is 22:00–06:00. At night the screen shows only the current time, the unlock time and a
 **Call** button. There is no way out: no Home, no Recents, no notification shade, no reboot
 trick, no safe mode, no clock change.
 
