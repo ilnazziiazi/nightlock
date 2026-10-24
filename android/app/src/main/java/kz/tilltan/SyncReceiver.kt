@@ -29,7 +29,8 @@ class SyncReceiver : BroadcastReceiver() {
             )
             if (start == end) am.cancel(pi) else {
                 val at = Schedule.nextBoundary(start, end, now).atZone(ZoneId.systemDefault())
-                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at.toEpochSecond() * 1000, pi)
+                // setAlarmClock: the only alarm type vendor ROMs don't widen into an hour window.
+                am.setAlarmClock(AlarmManager.AlarmClockInfo(at.toEpochSecond() * 1000, pi), pi)
             }
 
             val dpm = ctx.getSystemService(DevicePolicyManager::class.java)

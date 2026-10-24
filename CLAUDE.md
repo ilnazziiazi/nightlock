@@ -10,7 +10,7 @@
 - **Zero deps.** Kotlin + Android framework. Без Compose, AppCompat, Material, Coroutines,
   Hilt и т.п. Единственная зависимость — junit (test only). Не добавлять.
 - **Zero battery.** Нет сервисов, нет WorkManager, нет polling. Один exact-алярм
-  (`AlarmManager.setExactAndAllowWhileIdle`) на ближайшую границу окна. Всё.
+  (`AlarmManager.setAlarmClock` — единственный тип, который OEM-прошивки не размазывают в окно ±1ч) на ближайшую границу окна. Всё.
 - **Нет выхода ночью.** Это фича. Не добавлять кнопки «пауза», «отложить», «аварийный выход».
   Аварийный выход — только adb (см. README).
 
