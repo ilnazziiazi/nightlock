@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sunrise: half sun over the horizon. 108dp canvas, art inside the 66dp safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M36,60 A18,18 0 0 1 72,60 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M30,66 H78 V70 H30 Z" />
+</vector>

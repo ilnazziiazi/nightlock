@@ -8,6 +8,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.UserManager
+import android.provider.AlarmClock
+import android.content.pm.PackageManager
 import android.telecom.TelecomManager
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -47,7 +49,11 @@ class SyncReceiver : BroadcastReceiver() {
         private fun arm(ctx: Context, dpm: DevicePolicyManager) {
             val admin = ComponentName(ctx, AdminReceiver::class.java)
             val dialer = ctx.getSystemService(TelecomManager::class.java).defaultDialerPackage
-            dpm.setLockTaskPackages(admin, listOfNotNull(ctx.packageName, dialer).toTypedArray())
+            // Clock app: so a morning alarm's full-screen UI can show over the kiosk and be dismissed.
+            val clock = ctx.packageManager.resolveActivity(
+                Intent(AlarmClock.ACTION_SHOW_ALARMS), PackageManager.MATCH_DEFAULT_ONLY
+            )?.activityInfo?.packageName
+            dpm.setLockTaskPackages(admin, listOfNotNull(ctx.packageName, dialer, clock).toTypedArray())
             dpm.setLockTaskFeatures(
                 admin,
                 DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD or DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS

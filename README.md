@@ -8,6 +8,11 @@ trick, no safe mode, no clock change.
 Built on Android **Device Owner** → kiosk mode (lock task). No background services, no
 battery drain: a single alarm scheduled for the next window boundary.
 
+## Download
+
+Grab `tilltan-<version>.apk` from [Releases](https://github.com/ilnazziiazi/tilltan/releases)
+and continue from [Install and grant permissions](#install-and-grant-permissions).
+
 ## Build
 
 ```sh
@@ -81,11 +86,13 @@ the emergency exit below possible.
 ## Update
 
 ```sh
-cd android && ./gradlew :app:assembleDebug && adb install -r -t app/build/outputs/apk/debug/app-debug.apk
+cd android && ./gradlew :app:assembleRelease && adb install -r -t app/build/outputs/apk/release/app-release.apk
 ```
 
-Signed with the debug key `~/.android/debug.keystore`. If you lose it you cannot update
-the app, only remove device owner and reinstall.
+Builds are signed with `~/.tilltan/release.jks`, described by `android/keystore.properties`
+(both outside git). Back them up: without that key you cannot update the installed app,
+only remove device owner and reinstall. Without `keystore.properties` the build falls back
+to the debug key, which the installed device owner will reject.
 
 ## Emergency exit
 

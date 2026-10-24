@@ -1,6 +1,13 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+}
+
+// Release key lives outside the repo: ~/.tilltan/release.jks, described by android/keystore.properties.
+val keystore = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { f ->
+    Properties().apply { f.inputStream().use { load(it) } }
 }
 
 android {
@@ -13,8 +20,19 @@ android {
         versionCode = 1
         versionName = "0.1"
     }
+    keystore?.let { p ->
+        signingConfigs.create("release") {
+            storeFile = file(p.getProperty("storeFile"))
+            storePassword = p.getProperty("storePassword")
+            keyAlias = p.getProperty("keyAlias")
+            keyPassword = p.getProperty("keyPassword")
+        }
+    }
     buildTypes {
-        release { isMinifyEnabled = false }
+        // Both build types share the release key, so debug (run-as for testing) and release
+        // builds can be installed over each other.
+        release { isMinifyEnabled = false; signingConfig = signingConfigs.findByName("release") }
+        debug { signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug") }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
