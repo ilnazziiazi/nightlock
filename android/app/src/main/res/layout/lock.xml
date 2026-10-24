@@ -12,9 +12,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <Chronometer
+    <TextView
         android:id="@+id/left"
-        android:countDown="true"
         android:textSize="24sp"
         android:layout_marginTop="16dp"
         android:layout_width="wrap_content"

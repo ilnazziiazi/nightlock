@@ -9,6 +9,7 @@
     <application
         android:label="tilltan"
         android:testOnly="true"
+        android:enableOnBackInvokedCallback="false"
         android:theme="@style/Theme.Tilltan">
 
         <activity android:name=".MainActivity" android:exported="true">
