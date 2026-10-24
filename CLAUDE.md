@@ -59,7 +59,8 @@ which the installed device owner rejects.
 1. Bump `versionCode` / `versionName` in `app/build.gradle.kts`.
 2. `./gradlew :app:testDebugUnitTest :app:assembleRelease`, install and run the on-device test below.
 3. `git tag vX.Y && git push --tags`
-4. `gh release create vX.Y app/build/outputs/apk/release/app-release.apk#tilltan-X.Y.apk --title "tilltan X.Y" --notes "..."`
+4. `cp app/build/outputs/apk/release/app-release.apk /tmp/tilltan-X.Y.apk && gh release create vX.Y /tmp/tilltan-X.Y.apk --title "tilltan X.Y" --notes "..."`
+   (the `file#label` form only changes the display label, not the asset name).
 
 ## Don'ts
 
