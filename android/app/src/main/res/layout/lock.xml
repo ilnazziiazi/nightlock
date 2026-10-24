@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <TextView
+        android:text="@string/till_tan"
+        android:textSize="48sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Chronometer
+        android:id="@+id/left"
+        android:countDown="true"
+        android:textSize="24sp"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/call"
+        android:text="@string/call"
+        android:layout_marginTop="96dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>
