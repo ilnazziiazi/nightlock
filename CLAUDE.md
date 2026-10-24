@@ -46,7 +46,7 @@ SDK: `/opt/homebrew/share/android-commandlinetools` (brew cask `android-commandl
 путь в `android/local.properties` (не в git). compileSdk/targetSdk 36, minSdk 33, AGP 8.13,
 Gradle 8.14 (wrapper; системный gradle 9.x с AGP 8 не работает).
 
-Целевое устройство: OnePlus 15R, Android 16 / OxygenOS 16. Debug-ключ `~/.android/debug.keystore`
+Debug-ключ `~/.android/debug.keystore`
 — им подписан установленный device owner, не терять, иначе обновить APK нельзя.
 
 ## Чего не делать

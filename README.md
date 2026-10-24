@@ -1,13 +1,14 @@
 # tilltan
 
-**till tan** — «до утра» (*tan* — утро по-казахски). Блокирует телефон на ночь.
-По умолчанию 22:00–06:00. Ночью на экране только «till tan», таймер и кнопка **Call**.
-Выйти нельзя: ни Home, ни Recents, ни шторка, ни перезагрузка, ни safe mode, ни перевод часов.
+**till tan** — "until morning" (*tan* is Kazakh for morning). Locks your phone for the night.
+Default window is 22:00–06:00. At night the screen shows only "till tan", a countdown and a
+**Call** button. There is no way out: no Home, no Recents, no notification shade, no reboot
+trick, no safe mode, no clock change.
 
-Работает через Android **Device Owner** → kiosk-режим (lock task). Фоновых сервисов нет,
-батарею не ест: один будильник на ближайшую границу окна.
+Built on Android **Device Owner** → kiosk mode (lock task). No background services, no
+battery drain: a single alarm scheduled for the next window boundary.
 
-## Сборка
+## Build
 
 ```sh
 brew install openjdk@21 && brew install --cask android-commandlinetools android-platform-tools
@@ -17,86 +18,88 @@ yes | sdkmanager --licenses; sdkmanager "platforms;android-36" "build-tools;36.0
 cd android && ./gradlew :app:assembleDebug
 ```
 
-APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
+APK: `android/app/build/outputs/apk/debug/app-debug.apk`. Requires Android 13+.
 
-## Установка и выдача прав (OnePlus 15R, Android 16 / OxygenOS 16)
+## Install and grant permissions
 
-Device Owner можно назначить только через adb и только пока на телефоне **нет ни одного
-аккаунта**. Делается один раз.
+Device Owner can only be assigned over adb, and only while the device has **no accounts
+and no secondary users**. It is a one-time step.
 
-### 1. Включить отладку
+### 1. Enable USB debugging
 
-Настройки → О телефоне → Версия → 7 раз тап по «Номер сборки».
-Настройки → Система → Для разработчиков:
-- **Отладка по USB** — вкл.
-- **Отключить мониторинг разрешений** (Disable permission monitoring) — вкл. Специфика
-  OxygenOS/ColorOS: без этого часть adb-команд молча блокируется.
+Settings → About phone → tap "Build number" 7 times.
+Settings → System → Developer options:
+- **USB debugging** — on.
+- On some vendor ROMs (OxygenOS/ColorOS, MIUI/HyperOS) there is an extra switch such as
+  **Disable permission monitoring** or **USB debugging (Security settings)**. Turn it on,
+  otherwise adb commands may silently fail.
 
-Подключить кабель, на телефоне разрешить отладку с этого компьютера:
-
-```sh
-adb devices        # должен быть статус device, не unauthorized
-```
-
-### 2. Убрать всё, что мешает `set-device-owner`
-
-Android откажет, если на устройстве есть аккаунты или дополнительные пользователи.
-Проверить:
+Plug in the cable, accept the debugging prompt on the phone:
 
 ```sh
-adb shell dumpsys account | grep "Account {"   # должно быть пусто
-adb shell pm list users                        # только UserInfo{0:...}
+adb devices        # status must be "device", not "unauthorized"
 ```
 
-Удалить (потом всё вернётся):
-- Настройки → Пользователи и аккаунты → **все** аккаунты: Google, OnePlus/HeyTap,
-  WhatsApp, Telegram, почта и т.д. (`dumpsys account` покажет, что осталось).
-- **Private Space** (Настройки → Безопасность и конфиденциальность → Private space) — удалить.
-- **Клоны приложений** (Настройки → Приложения → Клонирование приложений) — выключить все.
-- Гости и второй пользователь (Настройки → Пользователи) — удалить.
+### 2. Remove what blocks `set-device-owner`
 
-### 3. Поставить и назначить Device Owner
+Android refuses if any account or extra user exists. Check:
+
+```sh
+adb shell dumpsys account | grep "Account {"   # must be empty
+adb shell pm list users                        # only UserInfo{0:...}
+```
+
+Remove (you will add everything back afterwards):
+- Settings → Users & accounts → **every** account: Google, vendor account, WhatsApp,
+  Telegram, mail, etc. `dumpsys account` shows what is left.
+- **Private Space** (Settings → Security & privacy → Private space) — delete.
+- **App cloning / dual apps** — disable all.
+- Guest and secondary users (Settings → Users) — delete.
+
+### 3. Install and assign Device Owner
 
 ```sh
 adb install -t android/app/build/outputs/apk/debug/app-debug.apk
 adb shell dpm set-device-owner kz.tilltan/.AdminReceiver
 ```
 
-Ожидаемый ответ: `Success: Device owner set to package ComponentInfo{kz.tilltan/kz.tilltan.AdminReceiver}`.
+Expected: `Success: Device owner set to package ComponentInfo{kz.tilltan/kz.tilltan.AdminReceiver}`.
 
-Ошибки:
-- `already some accounts on the device` — остался аккаунт, см. `dumpsys account`.
-- `already several users on the device` — остался Private Space / клон / гость, см. `pm list users`.
-- `Not allowed to set the device owner` без деталей — проверить «Отключить мониторинг разрешений».
+Errors:
+- `already some accounts on the device` — an account is left, see `dumpsys account`.
+- `already several users on the device` — Private Space / clone / guest is left, see `pm list users`.
+- `Not allowed to set the device owner` with no details — check the vendor debugging switch from step 1.
 
-### 4. Вернуть аккаунты и открыть приложение
+### 4. Restore accounts and open the app
 
-Добавить обратно Google и остальные аккаунты. Открыть **tilltan** — должно быть
-«Device owner: yes. Lock is armed.» Выставить время. Готово.
+Add Google and the other accounts back. Open **tilltan** — it should say
+"Device owner: yes. Lock is armed." Set the times. Done.
 
-Флаг `-t` обязателен всегда (APK собран с `testOnly`, это и даёт аварийный выход ниже).
+The `-t` flag is always required: the APK is built with `testOnly`, which is what makes
+the emergency exit below possible.
 
-## Обновление
+## Update
 
 ```sh
 cd android && ./gradlew :app:assembleDebug && adb install -r -t app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Подпись — debug-ключ `~/.android/debug.keystore`. Если его потерять, обновить приложение
-будет нельзя (только снять device owner и переустановить).
+Signed with the debug key `~/.android/debug.keystore`. If you lose it you cannot update
+the app, only remove device owner and reinstall.
 
-## Аварийный выход
+## Emergency exit
 
-Ночью из приложения выйти нельзя — так задумано. Единственный способ — компьютер и adb:
+There is no way out of the lock from the phone itself. That is the point. The only exit
+is a computer with adb:
 
 ```sh
 adb shell dpm remove-active-admin kz.tilltan/.AdminReceiver
 adb uninstall kz.tilltan
 ```
 
-Первая команда снимает device owner и все ограничения, экран блокировки сразу отпускает.
-Работает только потому, что APK собран с `android:testOnly="true"`.
+The first command removes device owner and all restrictions; the lock screen releases
+immediately. It works only because the APK is built with `android:testOnly="true"`.
 
-## Что внутри
+## Inside
 
-Пять Kotlin-файлов, без зависимостей. Подробности — в [CLAUDE.md](CLAUDE.md).
+Five Kotlin files, zero dependencies. See [CLAUDE.md](CLAUDE.md).
