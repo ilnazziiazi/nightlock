@@ -1,39 +1,40 @@
 # tilltan
 
-«till tan» — до утра (tan = утро, каз.). Android-приложение, которое по расписанию
-(по умолчанию 22:00–06:00) превращает телефон в экран «till tan», с которого нельзя выйти.
-Аналог Cold Turkey для всего устройства, без блокировки отдельных сайтов/приложений.
+"till tan" — until morning (*tan* is Kazakh for morning). An Android app that turns the phone
+into a "till tan" screen on a schedule (default 22:00–06:00) with no way out.
+Cold Turkey for the whole device; no per-site or per-app blocking.
 
-## Принципы
+## Principles
 
-- **Ponytail.** Минимум кода, файлов, зависимостей. Сначала stdlib/framework, потом всё остальное.
-- **Zero deps.** Kotlin + Android framework. Без Compose, AppCompat, Material, Coroutines,
-  Hilt и т.п. Единственная зависимость — junit (test only). Не добавлять.
-- **Zero battery.** Нет сервисов, нет WorkManager, нет polling. Один exact-алярм
-  (`AlarmManager.setAlarmClock` — единственный тип, который OEM-прошивки не размазывают в окно ±1ч) на ближайшую границу окна. Всё.
-- **Нет выхода ночью.** Это фича. Не добавлять кнопки «пауза», «отложить», «аварийный выход».
-  Аварийный выход — только adb (см. README).
+- **Ponytail.** Minimum code, files and dependencies. Stdlib/framework first, everything else later.
+- **Zero deps.** Kotlin + Android framework. No Compose, AppCompat, Material, Coroutines,
+  Hilt, etc. The only dependency is junit (test only). Do not add more.
+- **Zero battery.** No services, no WorkManager, no polling. One alarm
+  (`AlarmManager.setAlarmClock`, the only kind vendor ROMs don't widen into a ±1h window)
+  for the next window boundary. That's it.
+- **No exit at night.** This is the feature. Do not add "pause", "snooze" or "emergency exit"
+  buttons. The emergency exit is adb only (see README).
 
-## Как работает
+## How it works
 
-Device Owner (ставится через `adb shell dpm set-device-owner`) → `startLockTask()` (kiosk).
+Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask()` (kiosk).
 
-- `Schedule.kt` — окно в минутах дня в SharedPreferences + чистые `isActive`, `nextBoundary`.
-  Единственная логика с тестом (`ScheduleTest.kt`). `start == end` = выключено.
-- `SyncReceiver.kt` — единственная точка входа: алярм / BOOT_COMPLETED / TIME_SET /
-  TIMEZONE_CHANGED → `sync(ctx)`: переставить алярм, применить device-owner политику (`arm`),
-  запустить `LockActivity` если окно активно, иначе отпустить.
-- `LockActivity.kt` — «till tan», `Chronometer countDown` до конца, кнопка Call (`ACTION_DIAL`).
-  Back заглушен, `onResume → startLockTask()`. `singleTask`, `lockTaskMode=if_whitelisted`.
-- `MainActivity.kt` — два `TimePickerDialog`, статус device owner. `onResume → sync()` —
-  поэтому ночью настройки недостижимы: экран сразу перекрывается `LockActivity`.
-- `AdminReceiver.kt` — пустой `DeviceAdminReceiver`, цель для `dpm`.
-- Device-owner политика (в `arm`): lock task packages = [tilltan, default dialer];
+- `Schedule.kt` — window in minutes of day in SharedPreferences + pure `isActive`, `nextBoundary`.
+  The only logic with a test (`ScheduleTest.kt`). `start == end` means disabled.
+- `SyncReceiver.kt` — the single entry point: alarm / BOOT_COMPLETED / TIME_SET /
+  TIMEZONE_CHANGED → `sync(ctx)`: reschedule the alarm, apply device-owner policy (`arm`),
+  launch `LockActivity` if the window is active, otherwise release it.
+- `LockActivity.kt` — "till tan", `Chronometer countDown` to the end, Call button (`ACTION_DIAL`).
+  Back is swallowed, `onResume → startLockTask()`. `singleTask`, `lockTaskMode=if_whitelisted`.
+- `MainActivity.kt` — two `TimePickerDialog`s, device-owner status. `onResume → sync()`,
+  which is what makes settings unreachable at night: the screen is immediately covered by `LockActivity`.
+- `AdminReceiver.kt` — empty `DeviceAdminReceiver`, the target for `dpm`.
+- Device-owner policy (in `arm`): lock task packages = [tilltan, default dialer];
   features = KEYGUARD | GLOBAL_ACTIONS; restrictions = DISALLOW_SAFE_BOOT, DISALLOW_CONFIG_DATE_TIME.
-- `android:testOnly="true"` в манифесте — чтобы `dpm remove-active-admin` работал. Поэтому
-  всегда `adb install -t`.
+- `android:testOnly="true"` in the manifest so that `dpm remove-active-admin` works. Hence
+  always `adb install -t`.
 
-## Сборка
+## Build
 
 ```sh
 export JAVA_HOME=/opt/homebrew/opt/openjdk@21   # brew install openjdk@21
@@ -43,24 +44,24 @@ adb install -r -t app/build/outputs/apk/debug/app-debug.apk
 ```
 
 SDK: `/opt/homebrew/share/android-commandlinetools` (brew cask `android-commandlinetools`),
-путь в `android/local.properties` (не в git). compileSdk/targetSdk 36, minSdk 33, AGP 8.13,
-Gradle 8.14 (wrapper; системный gradle 9.x с AGP 8 не работает).
+path in `android/local.properties` (not in git). compileSdk/targetSdk 36, minSdk 33, AGP 8.13,
+Gradle 8.14 (wrapper; system gradle 9.x does not work with AGP 8).
 
-Debug-ключ `~/.android/debug.keystore`
-— им подписан установленный device owner, не терять, иначе обновить APK нельзя.
+Debug key `~/.android/debug.keystore` signed the installed device owner. Don't lose it,
+otherwise the APK can't be updated.
 
-## Чего не делать
+## Don'ts
 
-- Не выносить логику в сервисы/WorkManager «для надёжности» — device owner освобождён от
-  ограничений запуска activity из фона, алярма достаточно.
-- Не добавлять per-day расписание, профили, статистику, уведомления — пока явно не попросят.
-- Не менять `applicationId` / имя `AdminReceiver` — это сломает уже установленный device owner.
+- Don't move logic into services/WorkManager "for reliability" — a device owner is exempt
+  from background activity launch restrictions, the alarm is enough.
+- Don't add per-weekday schedules, profiles, stats, notifications until explicitly asked.
+- Don't change `applicationId` or the `AdminReceiver` name — it breaks the installed device owner.
 
-## Тестирование на устройстве
+## On-device testing
 
-`am force-stop` для device-owner приложения игнорируется («protected package»), поэтому
-процесс с закэшированными prefs надо убивать через `run-as`. Окно задаётся напрямую в prefs
-(минуты дня), запуск MainActivity применяет его:
+`am force-stop` is ignored for a device-owner app ("protected package"), so a process with
+cached prefs has to be killed via `run-as`. Set the window directly in prefs (minutes of day);
+launching MainActivity applies it:
 
 ```sh
 adb shell run-as kz.tilltan kill $(adb shell pidof kz.tilltan)
@@ -71,5 +72,5 @@ adb shell dumpsys alarm | grep -A1 "kz.tilltan" | grep origWhen                 
 adb shell run-as kz.tilltan rm shared_prefs/tilltan.xml                                    # back to 22:00–06:00
 ```
 
-Проверено на Android 16: Home/Recents/Back не выбивают, Call открывает dialer внутри kiosk,
-снятие по алярму, релок после перезагрузки (после первой разблокировки), `dpm remove-active-admin`.
+Verified on Android 16: Home/Recents/Back don't escape, Call opens the dialer inside the kiosk,
+release by alarm, relock after reboot (after first unlock), `dpm remove-active-admin`.
