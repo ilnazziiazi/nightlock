@@ -30,13 +30,15 @@ Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask(
   are tested in `AllowedAppsTest.kt`. Launcher and settings packages are excluded.
 - `SuspendedApps.kt` — suspends other launchable apps during the lock, excluding allowed apps,
   the clock and enabled keyboards. Saves the undo list synchronously before changing Android policy; the morning
-  sync restores tracked apps without needing an Activity or surviving process. Failed restores
+  sync restores tracked apps without relying on in-memory state. Failed restores
   remain tracked for the next sync. Android-protected packages may reject suspension.
   `SuspendedAppsTest.kt` covers allowlist changes, restoration, process death and write failures.
 - `SyncReceiver.kt` — the single entry point: alarm / BOOT_COMPLETED / TIME_SET /
   TIMEZONE_CHANGED → `sync(ctx)`: reschedule the alarm, apply device-owner policy (`applyPolicy`),
-  launch `LockActivity` if the window is active. Outside the window, clear all lock task packages
-  so Android exits the kiosk even if the night lock process was killed while another app was open.
+  launch `LockActivity` if the window is active or a lock task still needs releasing. Outside the
+  window, restore the root Activity first: `stopLockTask()` clears even locked system dialogs.
+  Then `finishUnlock()` revokes lock task packages and restores suspended apps. A surviving
+  Activity/process is not required; clearing the package list alone leaves system dialogs locked.
 - `LockActivity.kt` — current time (`TextClock`), "until HH:MM",
   two-column app grid with lowercase text. Long press removes app access immediately.
   No timers, no handlers: the process does nothing while the screen is on.
@@ -50,7 +52,8 @@ Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask(
 - Device-owner policy (in `applyPolicy`): during the lock, packages = [night lock, clock app
   (so a morning alarm's full-screen UI can show and be dismissed)];
   plus activated selected apps, including the dialer only if selected and activated.
-  Outside the lock the package list is empty; time-change and safe-boot restrictions stay applied.
+  After the root task releases the lock, the package list is empty;
+  time-change and safe-boot restrictions stay applied.
   Features = KEYGUARD | GLOBAL_ACTIONS | BLOCK_ACTIVITY_START_IN_TASK;
   restrictions = DISALLOW_SAFE_BOOT, DISALLOW_CONFIG_DATE_TIME.
 - `android:testOnly="true"` in the manifest so that `dpm remove-active-admin` works. Hence
@@ -112,6 +115,9 @@ Launch it from the lock screen, then kill only the night lock process with `run-
 Expect `LOCKED` until the end time and `NONE` after the alarm, without pressing Back or reopening
 night lock. Repeat without killing the process as a control, then restore preferences.
 Both cycles passed on OnePlus CPH2767 on 2026-11-12; preferences matched the backup after restoration.
+Also test with Android's `BlockedAppActivity` on top (try Home during the lock), then kill
+night lock. The alarm must dismiss that system dialog and reach NONE without user input.
+This combined case passed on CPH2767 on 2026-11-12 after restoring the root task before unlock.
 
 Suspension regression: start music, enter a short lock window with a calculator allowed, and
 verify music is suspended/paused while the calculator and clock are not suspended. Open the

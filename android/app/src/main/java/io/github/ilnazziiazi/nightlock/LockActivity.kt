@@ -111,7 +111,10 @@ class LockActivity : Activity() {
     override fun onBackPressed() { if (preview) finish() }
 
     private fun release() {
-        if (!preview) stopLockTask()
+        if (!preview) {
+            stopLockTask()
+            SyncReceiver.finishUnlock(this)
+        }
         finish()
     }
 

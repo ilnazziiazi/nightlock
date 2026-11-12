@@ -1,6 +1,7 @@
 package io.github.ilnazziiazi.nightlock
 
 import android.app.AlarmManager
+import android.app.ActivityManager
 import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
@@ -44,10 +45,17 @@ class SyncReceiver : BroadcastReceiver() {
 
             val dpm = ctx.getSystemService(DevicePolicyManager::class.java)
             val owner = dpm.isDeviceOwnerApp(ctx.packageName)
-            if (owner) applyPolicy(ctx, dpm, AllowedApps.active(apps, nowMillis), active)
-            if (owner && active) {
+            val locked = ctx.getSystemService(ActivityManager::class.java).lockTaskModeState == ActivityManager.LOCK_TASK_MODE_LOCKED
+            // Keep our root task until stopLockTask() also clears Android's locked system dialogs.
+            if (owner && (active || !locked)) applyPolicy(ctx, dpm, AllowedApps.active(apps, nowMillis), active)
+            if (owner && (active || locked)) {
                 ctx.startActivity(Intent(ctx, LockActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }
+        }
+
+        fun finishUnlock(ctx: Context) {
+            val dpm = ctx.getSystemService(DevicePolicyManager::class.java)
+            if (dpm.isDeviceOwnerApp(ctx.packageName)) applyPolicy(ctx, dpm, emptySet(), false)
         }
 
         /** Idempotent device-owner policy. Cheap, so re-applied on every sync. */
@@ -57,7 +65,7 @@ class SyncReceiver : BroadcastReceiver() {
             val clock = ctx.packageManager.resolveActivity(
                 Intent(AlarmClock.ACTION_SHOW_ALARMS), PackageManager.MATCH_DEFAULT_ONLY
             )?.activityInfo?.packageName
-            // Revoking every package exits lock task even after our Activity/process is destroyed.
+            // Revoke packages only after the root Activity has stopped an ongoing lock task.
             val packages = if (active) (listOfNotNull(ctx.packageName, clock) + apps).distinct().toTypedArray() else emptyArray()
             dpm.setLockTaskPackages(admin, packages)
             dpm.setLockTaskFeatures(
