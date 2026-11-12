@@ -12,13 +12,13 @@ class LockActivity : Activity() {
         current = this
         setContentView(R.layout.lock)
         findViewById<Button>(R.id.call).setOnClickListener { startActivity(Intent(Intent.ACTION_DIAL)) }
-        findViewById<TextView>(R.id.until).text =
-            "${getString(R.string.until).lowercase()} ${Schedule.hhmm(Schedule.end(this))}"
     }
 
     /** Never pin outside the window: guards against the system restoring this screen in the morning. */
     override fun onResume() {
         super.onResume()
+        findViewById<TextView>(R.id.until).text =
+            "${getString(R.string.until).lowercase()} ${Schedule.hhmm(Schedule.state(this).end)}"
         if (Schedule.isActiveNow(this)) startLockTask() else release()
     }
 

@@ -4,6 +4,9 @@
     <string name="call">Call</string>
     <string name="from">From</string>
     <string name="until">Until</string>
+    <string name="schedule_current">Current lock: %1$s–%2$s</string>
+    <string name="schedule_pending">Selected times take effect on %1$s, after the protected lock ends.</string>
+    <string name="schedule_rule">Longer locks apply immediately. Shorter locks apply after the next lock ends.</string>
     <string name="owner_yes">Device owner: yes. Lock is armed.</string>
     <string name="owner_no">Device owner: NO. Lock will not engage.\nRun: adb shell dpm set-device-owner io.github.ilnazziiazi.nightlock/.AdminReceiver</string>
 </resources>

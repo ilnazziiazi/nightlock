@@ -20,9 +20,10 @@ class SyncReceiver : BroadcastReceiver() {
 
     companion object {
         fun sync(ctx: Context) {
-            val start = Schedule.start(ctx)
-            val end = Schedule.end(ctx)
             val now = LocalDateTime.now()
+            val schedule = Schedule.state(ctx, now)
+            val start = schedule.start
+            val end = schedule.end
 
             val am = ctx.getSystemService(AlarmManager::class.java)
             val pi = PendingIntent.getBroadcast(

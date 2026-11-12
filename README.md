@@ -8,6 +8,12 @@ trick, no safe mode, no clock change.
 Built on Android **Device Owner** → kiosk mode (lock task). No background services, no
 battery drain: a single alarm scheduled for the next window boundary.
 
+Extending the lock (starting earlier or ending later) takes effect immediately. Shortening
+or disabling it takes effect only after the nearest lock ends. For example, changing
+22:00–07:00 to 23:00–06:00 during the day keeps tonight at 22:00–07:00; the following
+night uses 23:00–06:00. The settings show the current lock and when your selected times
+take effect. Saved changes survive a restart.
+
 ## Download
 
 Grab `nightlock-<version>.apk` from [Releases](https://github.com/ilnazziiazi/nightlock/releases)

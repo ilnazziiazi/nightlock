@@ -24,6 +24,12 @@
         android:layout_height="wrap_content" />
 
     <TextView
+        android:id="@+id/schedule"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:id="@+id/status"
         android:layout_marginTop="48dp"
         android:textSize="14sp"

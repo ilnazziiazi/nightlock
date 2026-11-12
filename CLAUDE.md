@@ -21,15 +21,18 @@ Cold Turkey for the whole device; no per-site or per-app blocking.
 
 Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask()` (kiosk).
 
-- `Schedule.kt` — window in minutes of day in SharedPreferences + pure `isActive`, `nextBoundary`.
-  The only logic with a test (`ScheduleTest.kt`). `start == end` means disabled.
+- `Schedule.kt` — current and selected windows plus their application time in SharedPreferences.
+  Extensions apply immediately; reductions (including disabling) wait until the protected lock ends.
+  Pure `State.edit`, `State.resolve`, `isActive`, `nextBoundary` are tested in `ScheduleTest.kt`.
+  `start == end` means disabled. Existing preferences without pending fields keep their schedule.
 - `SyncReceiver.kt` — the single entry point: alarm / BOOT_COMPLETED / TIME_SET /
   TIMEZONE_CHANGED → `sync(ctx)`: reschedule the alarm, apply device-owner policy (`arm`),
   launch `LockActivity` if the window is active, otherwise release it.
 - `LockActivity.kt` — current time (`TextClock`), "until HH:MM", Call button (`ACTION_DIAL`).
   No timers, no handlers: the process does nothing while the screen is on.
   Back is swallowed, `onResume → startLockTask()`. `singleTask`, `lockTaskMode=if_whitelisted`.
-- `MainActivity.kt` — two `TimePickerDialog`s, device-owner status. `onResume → sync()`,
+- `MainActivity.kt` — two `TimePickerDialog`s for selected times, current schedule, pending
+  application time and device-owner status. `onResume → sync()`,
   which is what makes settings unreachable at night: the screen is immediately covered by `LockActivity`.
 - `AdminReceiver.kt` — empty `DeviceAdminReceiver`, the target for `dpm`.
 - Device-owner policy (in `arm`): lock task packages = [night lock, default dialer, clock app
