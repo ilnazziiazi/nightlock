@@ -67,6 +67,7 @@ class SyncReceiver : BroadcastReceiver() {
             )
             dpm.addUserRestriction(admin, UserManager.DISALLOW_SAFE_BOOT)
             dpm.addUserRestriction(admin, UserManager.DISALLOW_CONFIG_DATE_TIME)
+            SuspendedApps.sync(ctx, dpm, admin, packages.toSet(), active)
         }
     }
 }

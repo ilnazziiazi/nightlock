@@ -17,8 +17,8 @@ android {
         applicationId = "io.github.ilnazziiazi.nightlock"
         minSdk = 33
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3"
+        versionCode = 4
+        versionName = "0.4"
     }
     keystore?.let { p ->
         signingConfigs.create("release") {

@@ -28,6 +28,11 @@ Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask(
 - `AllowedApps.kt` — up to six packages with individual activation timestamps in SharedPreferences.
   Additions wait 24 hours; removals are immediate. Pending additions occupy slots. Pure rules
   are tested in `AllowedAppsTest.kt`. Launcher and settings packages are excluded.
+- `SuspendedApps.kt` — suspends other launchable apps during the lock, excluding allowed apps,
+  the clock and enabled keyboards. Saves the undo list synchronously before changing Android policy; the morning
+  sync restores tracked apps without needing an Activity or surviving process. Failed restores
+  remain tracked for the next sync. Android-protected packages may reject suspension.
+  `SuspendedAppsTest.kt` covers allowlist changes, restoration, process death and write failures.
 - `SyncReceiver.kt` — the single entry point: alarm / BOOT_COMPLETED / TIME_SET /
   TIMEZONE_CHANGED → `sync(ctx)`: reschedule the alarm, apply device-owner policy (`applyPolicy`),
   launch `LockActivity` if the window is active. Outside the window, clear all lock task packages
@@ -107,3 +112,11 @@ Launch it from the lock screen, then kill only the night lock process with `run-
 Expect `LOCKED` until the end time and `NONE` after the alarm, without pressing Back or reopening
 night lock. Repeat without killing the process as a control, then restore preferences.
 Both cycles passed on OnePlus CPH2767 on 2026-11-12; preferences matched the backup after restoration.
+
+Suspension regression: start music, enter a short lock window with a calculator allowed, and
+verify music is suspended/paused while the calculator and clock are not suspended. Open the
+calculator, kill night lock, and wait for the alarm: expect NONE, music no longer suspended,
+and an empty suspension journal. Verify music can play again manually.
+Passed on CPH2767 on 2026-11-12 with Yandex Music; automatic playback did not resume.
+Restore the schedule and app-selection preferences, then sync to clear remaining suspensions;
+never overwrite the suspension journal before restoring the tracked packages.

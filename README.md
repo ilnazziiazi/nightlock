@@ -22,6 +22,12 @@ the same 24-hour wait. Alarms remain available separately; launchers and system 
 cannot be selected. **preview lock screen** shows your selected
 apps, including pending ones, without enabling access or locking the phone.
 
+During the lock, other launchable apps are suspended: Android blocks their screens, audio,
+vibration and notifications. Allowed apps, the clock and enabled keyboards remain available. Suspension is removed
+at the end of the window, even if the night lock process has died. App data is preserved;
+this does not force-stop every background process. System services, launchers, settings and
+apps Android exempts from suspension (such as the default dialer) are not suspended.
+
 ## Download
 
 Grab `nightlock-<version>.apk` from [Releases](https://github.com/ilnazziiazi/nightlock/releases)
