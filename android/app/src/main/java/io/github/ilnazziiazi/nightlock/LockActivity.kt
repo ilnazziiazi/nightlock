@@ -19,7 +19,6 @@ class LockActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        current = this
         setContentView(R.layout.lock)
         findViewById<Button>(R.id.close_preview).setOnClickListener { if (preview) finish() }
     }
@@ -111,17 +110,9 @@ class LockActivity : Activity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() { if (preview) finish() }
 
-    fun release() {
+    private fun release() {
         if (!preview) stopLockTask()
         finish()
     }
 
-    override fun onDestroy() {
-        if (current === this) current = null
-        super.onDestroy()
-    }
-
-    companion object {
-        var current: LockActivity? = null
-    }
 }

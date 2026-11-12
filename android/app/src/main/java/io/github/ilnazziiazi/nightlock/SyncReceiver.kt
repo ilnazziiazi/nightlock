@@ -23,6 +23,7 @@ class SyncReceiver : BroadcastReceiver() {
             val schedule = Schedule.state(ctx, now)
             val start = schedule.start
             val end = schedule.end
+            val active = Schedule.isActive(start, end, now.hour * 60 + now.minute)
             val nowMillis = System.currentTimeMillis()
             val apps = AllowedApps.selected(ctx)
 
@@ -43,22 +44,22 @@ class SyncReceiver : BroadcastReceiver() {
 
             val dpm = ctx.getSystemService(DevicePolicyManager::class.java)
             val owner = dpm.isDeviceOwnerApp(ctx.packageName)
-            if (owner) arm(ctx, dpm, AllowedApps.active(apps, nowMillis))
-            if (owner && Schedule.isActive(start, end, now.hour * 60 + now.minute)) {
+            if (owner) applyPolicy(ctx, dpm, AllowedApps.active(apps, nowMillis), active)
+            if (owner && active) {
                 ctx.startActivity(Intent(ctx, LockActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            } else {
-                LockActivity.current?.takeUnless { it.preview }?.release()
             }
         }
 
         /** Idempotent device-owner policy. Cheap, so re-applied on every sync. */
-        private fun arm(ctx: Context, dpm: DevicePolicyManager, apps: Set<String>) {
+        private fun applyPolicy(ctx: Context, dpm: DevicePolicyManager, apps: Set<String>, active: Boolean) {
             val admin = ComponentName(ctx, AdminReceiver::class.java)
             // Clock app: so a morning alarm's full-screen UI can show over the kiosk and be dismissed.
             val clock = ctx.packageManager.resolveActivity(
                 Intent(AlarmClock.ACTION_SHOW_ALARMS), PackageManager.MATCH_DEFAULT_ONLY
             )?.activityInfo?.packageName
-            dpm.setLockTaskPackages(admin, (listOfNotNull(ctx.packageName, clock) + apps).distinct().toTypedArray())
+            // Revoking every package exits lock task even after our Activity/process is destroyed.
+            val packages = if (active) (listOfNotNull(ctx.packageName, clock) + apps).distinct().toTypedArray() else emptyArray()
+            dpm.setLockTaskPackages(admin, packages)
             dpm.setLockTaskFeatures(
                 admin,
                 DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD or DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS or

@@ -29,8 +29,9 @@ Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask(
   Additions wait 24 hours; removals are immediate. Pending additions occupy slots. Pure rules
   are tested in `AllowedAppsTest.kt`. Launcher and settings packages are excluded.
 - `SyncReceiver.kt` — the single entry point: alarm / BOOT_COMPLETED / TIME_SET /
-  TIMEZONE_CHANGED → `sync(ctx)`: reschedule the alarm, apply device-owner policy (`arm`),
-  launch `LockActivity` if the window is active, otherwise release it.
+  TIMEZONE_CHANGED → `sync(ctx)`: reschedule the alarm, apply device-owner policy (`applyPolicy`),
+  launch `LockActivity` if the window is active. Outside the window, clear all lock task packages
+  so Android exits the kiosk even if the night lock process was killed while another app was open.
 - `LockActivity.kt` — current time (`TextClock`), "until HH:MM",
   two-column app grid with lowercase text. Long press removes app access immediately.
   No timers, no handlers: the process does nothing while the screen is on.
@@ -41,9 +42,10 @@ Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask(
   `onResume → sync()`,
   which is what makes settings unreachable at night: the screen is immediately covered by `LockActivity`.
 - `AdminReceiver.kt` — empty `DeviceAdminReceiver`, the target for `dpm`.
-- Device-owner policy (in `arm`): lock task packages = [night lock, clock app
+- Device-owner policy (in `applyPolicy`): during the lock, packages = [night lock, clock app
   (so a morning alarm's full-screen UI can show and be dismissed)];
   plus activated selected apps, including the dialer only if selected and activated.
+  Outside the lock the package list is empty; time-change and safe-boot restrictions stay applied.
   Features = KEYGUARD | GLOBAL_ACTIONS | BLOCK_ACTIVITY_START_IN_TASK;
   restrictions = DISALLOW_SAFE_BOOT, DISALLOW_CONFIG_DATE_TIME.
 - `android:testOnly="true"` in the manifest so that `dpm remove-active-admin` works. Hence
@@ -99,3 +101,9 @@ adb shell run-as io.github.ilnazziiazi.nightlock rm shared_prefs/nightlock.xml  
 
 Previously verified on Android 16: Home/Recents/Back don't escape,
 release by alarm, relock after reboot (after first unlock), `dpm remove-active-admin`.
+
+Process-death regression: back up preferences, set a short lock window and allow a calculator.
+Launch it from the lock screen, then kill only the night lock process with `run-as ... kill -9 PID`.
+Expect `LOCKED` until the end time and `NONE` after the alarm, without pressing Back or reopening
+night lock. Repeat without killing the process as a control, then restore preferences.
+Both cycles passed on OnePlus CPH2767 on 2026-11-12; preferences matched the backup after restoration.
