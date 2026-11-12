@@ -3,4 +3,13 @@
     <style name="Theme.NightLock" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@android:color/black</item>
     </style>
+    <style name="AppButton" parent="android:Widget.Material.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">#eeeeee</item>
+        <item name="android:backgroundTint">#181818</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
+    </style>
 </resources>

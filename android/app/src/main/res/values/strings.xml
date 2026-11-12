@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">night lock</string>
-    <string name="call">Call</string>
     <string name="from">From</string>
     <string name="until">Until</string>
-    <string name="schedule_current">Current lock: %1$s–%2$s</string>
-    <string name="schedule_pending">Selected times take effect on %1$s, after the protected lock ends.</string>
-    <string name="schedule_rule">Longer locks apply immediately. Shorter locks apply after the next lock ends.</string>
-    <string name="owner_yes">Device owner: yes. Lock is armed.</string>
-    <string name="owner_no">Device owner: NO. Lock will not engage.\nRun: adb shell dpm set-device-owner io.github.ilnazziiazi.nightlock/.AdminReceiver</string>
+    <string name="schedule_current">next lock: %1$s–%2$s</string>
+    <string name="apps">choose apps</string>
+    <string name="apps_count">choose apps · %1$d/%2$d</string>
+    <string name="apps_rule">new apps available after 24 hours</string>
+    <string name="apps_limit">Choose up to 6 apps, including pending additions.</string>
+    <string name="app_unavailable">This app is no longer available.</string>
+    <string name="apps_empty">no apps available yet</string>
+    <string name="apps_remove_hint">hold an app to remove access</string>
+    <string name="apps_preview_hint">preview includes pending apps\nhold an app to remove access</string>
+    <string name="remove_app">Remove access to %1$s immediately?</string>
+    <string name="remove">remove</string>
+    <string name="preview">preview lock screen</string>
+    <string name="preview_only">Preview only. App access starts after the 24-hour wait.</string>
+    <string name="close_preview">close preview</string>
+    <string name="owner_yes">lock enabled</string>
+    <string name="owner_no">setup required · lock inactive</string>
 </resources>

@@ -13,7 +13,7 @@ Cold Turkey for the whole device; no per-site or per-app blocking.
   Hilt, etc. The only dependency is junit (test only). Do not add more.
 - **Zero battery.** No services, no WorkManager, no polling. One alarm
   (`AlarmManager.setAlarmClock`, the only kind vendor ROMs don't widen into a ±1h window)
-  for the next window boundary. That's it.
+  for the next window boundary or pending app activation. That's it.
 - **No exit at night.** This is the feature. Do not add "pause", "snooze" or "emergency exit"
   buttons. The emergency exit is adb only (see README).
 
@@ -25,19 +25,27 @@ Device Owner (assigned via `adb shell dpm set-device-owner`) → `startLockTask(
   Extensions apply immediately; reductions (including disabling) wait until the protected lock ends.
   Pure `State.edit`, `State.resolve`, `isActive`, `nextBoundary` are tested in `ScheduleTest.kt`.
   `start == end` means disabled. Existing preferences without pending fields keep their schedule.
+- `AllowedApps.kt` — up to six packages with individual activation timestamps in SharedPreferences.
+  Additions wait 24 hours; removals are immediate. Pending additions occupy slots. Pure rules
+  are tested in `AllowedAppsTest.kt`. Launcher and settings packages are excluded.
 - `SyncReceiver.kt` — the single entry point: alarm / BOOT_COMPLETED / TIME_SET /
   TIMEZONE_CHANGED → `sync(ctx)`: reschedule the alarm, apply device-owner policy (`arm`),
   launch `LockActivity` if the window is active, otherwise release it.
-- `LockActivity.kt` — current time (`TextClock`), "until HH:MM", Call button (`ACTION_DIAL`).
+- `LockActivity.kt` — current time (`TextClock`), "until HH:MM",
+  two-column app grid with lowercase text. Long press removes app access immediately.
   No timers, no handlers: the process does nothing while the screen is on.
-  Back is swallowed, `onResume → startLockTask()`. `singleTask`, `lockTaskMode=if_whitelisted`.
-- `MainActivity.kt` — two `TimePickerDialog`s for selected times, current schedule, pending
-  application time and device-owner status. `onResume → sync()`,
+  Back is swallowed, `onResume → startLockTask()`. `singleTask`. Preview is unpinned and cannot
+  launch selected apps; a real lock always overrides preview.
+- `MainActivity.kt` — two `TimePickerDialog`s for selected times, protected next lock when
+  changes are pending, app selection, preview and short device-owner status. No activation dates.
+  `onResume → sync()`,
   which is what makes settings unreachable at night: the screen is immediately covered by `LockActivity`.
 - `AdminReceiver.kt` — empty `DeviceAdminReceiver`, the target for `dpm`.
-- Device-owner policy (in `arm`): lock task packages = [night lock, default dialer, clock app
+- Device-owner policy (in `arm`): lock task packages = [night lock, clock app
   (so a morning alarm's full-screen UI can show and be dismissed)];
-  features = KEYGUARD | GLOBAL_ACTIONS; restrictions = DISALLOW_SAFE_BOOT, DISALLOW_CONFIG_DATE_TIME.
+  plus activated selected apps, including the dialer only if selected and activated.
+  Features = KEYGUARD | GLOBAL_ACTIONS | BLOCK_ACTIVITY_START_IN_TASK;
+  restrictions = DISALLOW_SAFE_BOOT, DISALLOW_CONFIG_DATE_TIME.
 - `android:testOnly="true"` in the manifest so that `dpm remove-active-admin` works. Hence
   always `adb install -t`.
 
@@ -89,5 +97,5 @@ adb shell dumpsys alarm | grep -A1 "io.github.ilnazziiazi.nightlock" | grep orig
 adb shell run-as io.github.ilnazziiazi.nightlock rm shared_prefs/nightlock.xml                                    # back to 22:00–06:00
 ```
 
-Verified on Android 16: Home/Recents/Back don't escape, Call opens the dialer inside the kiosk,
+Previously verified on Android 16: Home/Recents/Back don't escape,
 release by alarm, relock after reboot (after first unlock), `dpm remove-active-admin`.

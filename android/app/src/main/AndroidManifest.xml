@@ -4,8 +4,19 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
-    <!-- Package visibility: needed to resolve the clock app for the lock task allowlist. -->
+    <!-- Only query launchable apps and the system roles needed by the kiosk. -->
     <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+        <intent>
+            <action android:name="android.settings.SETTINGS" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.SHOW_ALARMS" />
         </intent>
@@ -31,9 +42,7 @@
             android:name=".LockActivity"
             android:exported="false"
             android:launchMode="singleTask"
-            android:excludeFromRecents="true"
-            
-            android:lockTaskMode="if_whitelisted" />
+            android:excludeFromRecents="true" />
 
         <receiver
             android:name=".AdminReceiver"

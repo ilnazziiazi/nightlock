@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
     android:padding="32dp">
@@ -9,7 +13,7 @@
     <TextView
         android:text="@string/app_name"
         android:textSize="40sp"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="24dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
@@ -30,10 +34,31 @@
         android:layout_height="wrap_content" />
 
     <TextView
+        android:id="@+id/apps_summary"
+        android:layout_marginTop="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/apps"
+        android:text="@string/apps"
+        android:textAllCaps="false"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/preview"
+        android:text="@string/preview"
+        android:textAllCaps="false"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:id="@+id/status"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="24dp"
         android:textSize="14sp"
         android:textIsSelectable="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
+</ScrollView>

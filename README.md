@@ -1,8 +1,8 @@
 # night lock
 
 Locks your phone for the night.
-Default window is 22:00–06:00. At night the screen shows only the current time, the unlock time and a
-**Call** button. There is no way out: no Home, no Recents, no notification shade, no reboot
+Default window is 22:00–06:00. At night the screen shows the current time, the unlock time and
+your allowed apps. There is no way out: no Home, no Recents, no notification shade, no reboot
 trick, no safe mode, no clock change.
 
 Built on Android **Device Owner** → kiosk mode (lock task). No background services, no
@@ -11,8 +11,16 @@ battery drain: a single alarm scheduled for the next window boundary.
 Extending the lock (starting earlier or ending later) takes effect immediately. Shortening
 or disabling it takes effect only after the nearest lock ends. For example, changing
 22:00–07:00 to 23:00–06:00 during the day keeps tonight at 22:00–07:00; the following
-night uses 23:00–06:00. The settings show the current lock and when your selected times
-take effect. Saved changes survive a restart.
+night uses 23:00–06:00. If a change is pending, settings show the protected next lock.
+Saved changes survive a restart.
+
+Choose up to six apps to use during the lock. Each addition waits a full 24 hours; pending
+apps count toward the limit. Removing access is immediate, and adding the app again starts
+a new wait. Available apps appear as a two-column grid of lowercase names without icons.
+Hold a name to remove access during the lock. The phone app is an optional selection with
+the same 24-hour wait. Alarms remain available separately; launchers and system settings
+cannot be selected. **preview lock screen** shows your selected
+apps, including pending ones, without enabling access or locking the phone.
 
 ## Download
 
@@ -84,7 +92,7 @@ Errors:
 ### 4. Restore accounts and open the app
 
 Add Google and the other accounts back. Open **night lock** — it should say
-"Device owner: yes. Lock is armed." Set the times. Done.
+"lock enabled". Set the times. Done.
 
 The `-t` flag is always required: the APK is built with `testOnly`, which is what makes
 the emergency exit below possible.
@@ -115,4 +123,4 @@ immediately. It works only because the APK is built with `android:testOnly="true
 
 ## Inside
 
-Five Kotlin files, zero dependencies. See [CLAUDE.md](CLAUDE.md).
+Kotlin and the Android framework, zero runtime dependencies. See [CLAUDE.md](CLAUDE.md).
